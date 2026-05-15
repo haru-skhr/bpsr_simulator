@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPSR シミュレーター v2.0</title>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <title>BPSR シミュレーター v2.2</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -124,25 +123,6 @@
             box-sizing: border-box;
         }
 
-        .ocr-area {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px dashed #475569;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .ocr-area:hover { border-color: var(--accent-blue); background: rgba(56, 189, 248, 0.05); }
-
-        .progress-container {
-            display: none;
-            margin-top: 10px;
-        }
-        .progress-bar-bg { width: 100%; height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; margin-top: 5px;}
-        .progress-bar-fill { width: 0%; height: 100%; background: var(--accent-blue); transition: width 0.2s; }
-
         .pct-box {
             display: flex;
             justify-content: space-between;
@@ -167,19 +147,12 @@
             margin-bottom: 15px;
         }
 
-        .advice-box {
-            margin-top: 20px;
-            background: rgba(15, 23, 42, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-
+        /* トグルスイッチの修正 */
         .switch {
             position: relative;
             display: inline-block;
-            width: 36px;
-            height: 18px;
+            width: 40px;
+            height: 20px;
         }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -187,27 +160,36 @@
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: #475569;
-            transition: .4s;
-            border-radius: 18px;
+            transition: .3s;
+            border-radius: 20px;
         }
         .slider:before {
             position: absolute;
             content: "";
-            height: 12px; width: 12px;
+            height: 14px; width: 14px;
             left: 3px; bottom: 3px;
             background-color: white;
-            transition: .4s;
+            transition: .3s;
             border-radius: 50%;
         }
         input:checked + .slider { background-color: var(--accent-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .advice-box {
+            margin-top: 20px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="header">
-        <h1>BPSR シミュレーター v2.0</h1>
-        <p style="color:var(--text-dim)">％からの逆算反映・OCR強化版</p>
+        <h1>BPSR シミュレーター v2.2</h1>
+        <p style="color:var(--text-dim)">手入力最適化・軽量版</p>
     </div>
 
     <div class="hero-stats">
@@ -225,19 +207,6 @@
         <div class="left-col">
             <div class="section-title">📊 ステータス入力</div>
             
-            <div class="ocr-area" onclick="document.getElementById('file-input').click()">
-                <div style="font-size:0.9rem; color:var(--text-main);">📷 スクリーンショット読み取り</div>
-                <div style="font-size:0.75rem; color:var(--text-dim); margin-top:4px;">実数値または％を自動検出し、実数値へ反映します</div>
-                <input type="file" id="file-input" style="display:none" accept="image/*">
-                <div id="prog-container" class="progress-container">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--accent-blue);">
-                        <span id="prog-status">解析中...</span>
-                        <span id="prog-percent">0%</span>
-                    </div>
-                    <div class="progress-bar-bg"><div id="prog-fill" class="progress-bar-fill"></div></div>
-                </div>
-            </div>
-
             <div class="stat-group group-base">
                 <div class="group-header" style="color:var(--accent-red);">🧬 基礎ステータス</div>
                 <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
@@ -291,11 +260,17 @@
             <div class="stat-card" style="border-left:none; background:rgba(15,23,42,0.5);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="font-size:0.8rem">ストームブレイド (速度1.6x)</span>
-                    <label class="switch"><input type="checkbox" id="toggle_storm" checked onchange="update()"><span class="slider"></span></label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle_storm" checked onchange="update()">
+                        <span class="slider"></span>
+                    </label>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:0.8rem">武器補正 (幸運+6.0%)</span>
-                    <label class="switch"><input type="checkbox" id="toggle_weapon" checked onchange="update()"><span class="slider"></span></label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle_weapon" checked onchange="update()">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -304,8 +279,12 @@
             <div class="section-title">🧬 因子設定</div>
             <div class="factor-card" id="slots_container"></div>
             <div class="advice-box">
-                <h3 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--accent-blue);">システムログ</h3>
-                <ul id="log" style="padding-left:15px; margin:0; list-style:none; color:var(--text-dim); font-size:0.75rem; height: 180px; overflow-y: auto;"></ul>
+                <h3 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--accent-blue);">インフォメーション</h3>
+                <ul style="padding-left:15px; margin:0; list-style:none; color:var(--text-dim); font-size:0.75rem;">
+                    <li>・筋力/敏捷/知力と戦闘ステータスを分離しました。</li>
+                    <li>・トグルスイッチの動作を修正しました。</li>
+                    <li>・外部ライブラリを削除し、ローカルでの動作を安定させました。</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -348,82 +327,7 @@
             `;
             container.appendChild(div);
         }
-        document.getElementById('file-input').addEventListener('change', handleImage);
         update();
-    }
-
-    // 逆算ロジック: % から実数値を推定
-    function reversePct(pct, k, base) {
-        const p = parseFloat(pct) - base;
-        if (p <= 0) return 0;
-        // p = (raw / (raw + k)) * 100  => raw = (k * p) / (100 - p)
-        return Math.round((k * p) / (100 - p));
-    }
-
-    async function handleImage(e) {
-        const file = e.target.files[0];
-        if(!file) return;
-        const container = document.getElementById('prog-container');
-        const fill = document.getElementById('prog-fill');
-        const percentText = document.getElementById('prog-percent');
-        const statusText = document.getElementById('prog-status');
-        container.style.display = 'block';
-        try {
-            const result = await Tesseract.recognize(file, 'jpn+eng', {
-                logger: m => {
-                    if (m.status === 'recognizing') {
-                        const p = Math.floor(m.progress * 100);
-                        fill.style.width = p + '%';
-                        percentText.innerText = p + '%';
-                    }
-                }
-            });
-            const text = result.data.text;
-            addLog("OCR読み取り完了。逆算反映を開始します。");
-
-            // 数値抽出マップ (実数値 または ％)
-            const map = {
-                'in_str': /筋力\s*(\d+)/, 'in_int': /知力\s*(\d+)/, 'in_agi': /敏捷\s*(\d+)/,
-                'in_dex': [/器用さ\s*(\d+)/, /器用さ\s*([\d\.]+)%/],
-                'in_crit': [/会心\s*(\d+)/, /会心\s*([\d\.]+)%/],
-                'in_fast': [/ファスト\s*(\d+)/, /ファスト\s*([\d\.]+)%/],
-                'in_luck': [/幸運\s*(\d+)/, /幸運\s*([\d\.]+)%/],
-                'in_omni': [/万能\s*(\d+)/, /万能\s*([\d\.]+)%/]
-            };
-
-            for(let id in map) {
-                const patterns = Array.isArray(map[id]) ? map[id] : [map[id]];
-                let foundRaw = false;
-
-                // 1. まず実数値を優先して探す
-                const matchRaw = text.match(patterns[0]);
-                if(matchRaw) {
-                    document.getElementById(id).value = matchRaw[1];
-                    foundRaw = true;
-                }
-
-                // 2. 実数値が見つからず、%パターンがあるなら逆算
-                if(!foundRaw && patterns[1]) {
-                    const matchPct = text.match(patterns[1]);
-                    if(matchPct) {
-                        const k = id === 'in_omni' ? K_OMNI : K_GEN;
-                        const base = BASES[id.replace('in_','')];
-                        const estimated = reversePct(matchPct[1], k, base);
-                        document.getElementById(id).value = estimated;
-                        addLog(`${id.replace('in_','')}: %から実数${estimated}を逆算反映しました`);
-                    }
-                }
-            }
-            setTimeout(() => { container.style.display = 'none'; }, 2000);
-            update();
-        } catch (err) { addLog("OCR解析エラー: GitHub Pages等で実行してください"); }
-    }
-
-    function addLog(msg) {
-        const log = document.getElementById('log');
-        const li = document.createElement('li');
-        li.innerText = "・" + msg;
-        log.prepend(li);
     }
 
     function calcRawPct(raw, k) {
