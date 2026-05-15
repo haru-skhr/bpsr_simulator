@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPSR シミュレーター v1.9</title>
+    <title>BPSR シミュレーター v2.0</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -82,7 +82,6 @@
             gap: 10px;
         }
 
-        /* グループ分けコンテナ */
         .stat-group {
             border-radius: 12px;
             padding: 15px;
@@ -207,8 +206,8 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>BPSR シミュレーター v1.9</h1>
-        <p style="color:var(--text-dim)">グループ別UI・構造化ステータス版</p>
+        <h1>BPSR シミュレーター v2.0</h1>
+        <p style="color:var(--text-dim)">％からの逆算反映・OCR強化版</p>
     </div>
 
     <div class="hero-stats">
@@ -228,6 +227,7 @@
             
             <div class="ocr-area" onclick="document.getElementById('file-input').click()">
                 <div style="font-size:0.9rem; color:var(--text-main);">📷 スクリーンショット読み取り</div>
+                <div style="font-size:0.75rem; color:var(--text-dim); margin-top:4px;">実数値または％を自動検出し、実数値へ反映します</div>
                 <input type="file" id="file-input" style="display:none" accept="image/*">
                 <div id="prog-container" class="progress-container">
                     <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--accent-blue);">
@@ -238,7 +238,6 @@
                 </div>
             </div>
 
-            <!-- 基礎ステータスグループ -->
             <div class="stat-group group-base">
                 <div class="group-header" style="color:var(--accent-red);">🧬 基礎ステータス</div>
                 <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
@@ -258,7 +257,6 @@
                 </div>
             </div>
 
-            <!-- 戦闘ステータスグループ -->
             <div class="stat-group group-battle">
                 <div class="group-header" style="color:var(--accent-blue);">⚔️ 戦闘ステータス</div>
                 <div class="stat-grid">
@@ -354,6 +352,14 @@
         update();
     }
 
+    // 逆算ロジック: % から実数値を推定
+    function reversePct(pct, k, base) {
+        const p = parseFloat(pct) - base;
+        if (p <= 0) return 0;
+        // p = (raw / (raw + k)) * 100  => raw = (k * p) / (100 - p)
+        return Math.round((k * p) / (100 - p));
+    }
+
     async function handleImage(e) {
         const file = e.target.files[0];
         if(!file) return;
@@ -373,19 +379,44 @@
                 }
             });
             const text = result.data.text;
-            addLog("OCR読み取り完了");
+            addLog("OCR読み取り完了。逆算反映を開始します。");
+
+            // 数値抽出マップ (実数値 または ％)
             const map = {
                 'in_str': /筋力\s*(\d+)/, 'in_int': /知力\s*(\d+)/, 'in_agi': /敏捷\s*(\d+)/,
-                'in_dex': /器用さ\s*(\d+)/, 'in_crit': /会心\s*(\d+)/, 'in_fast': /ファスト\s*(\d+)/,
-                'in_luck': /幸運\s*(\d+)/, 'in_omni': /万能\s*(\d+)/
+                'in_dex': [/器用さ\s*(\d+)/, /器用さ\s*([\d\.]+)%/],
+                'in_crit': [/会心\s*(\d+)/, /会心\s*([\d\.]+)%/],
+                'in_fast': [/ファスト\s*(\d+)/, /ファスト\s*([\d\.]+)%/],
+                'in_luck': [/幸運\s*(\d+)/, /幸運\s*([\d\.]+)%/],
+                'in_omni': [/万能\s*(\d+)/, /万能\s*([\d\.]+)%/]
             };
+
             for(let id in map) {
-                const match = text.match(map[id]);
-                if(match) document.getElementById(id).value = match[1];
+                const patterns = Array.isArray(map[id]) ? map[id] : [map[id]];
+                let foundRaw = false;
+
+                // 1. まず実数値を優先して探す
+                const matchRaw = text.match(patterns[0]);
+                if(matchRaw) {
+                    document.getElementById(id).value = matchRaw[1];
+                    foundRaw = true;
+                }
+
+                // 2. 実数値が見つからず、%パターンがあるなら逆算
+                if(!foundRaw && patterns[1]) {
+                    const matchPct = text.match(patterns[1]);
+                    if(matchPct) {
+                        const k = id === 'in_omni' ? K_OMNI : K_GEN;
+                        const base = BASES[id.replace('in_','')];
+                        const estimated = reversePct(matchPct[1], k, base);
+                        document.getElementById(id).value = estimated;
+                        addLog(`${id.replace('in_','')}: %から実数${estimated}を逆算反映しました`);
+                    }
+                }
             }
             setTimeout(() => { container.style.display = 'none'; }, 2000);
             update();
-        } catch (err) { addLog("OCR解析エラー"); }
+        } catch (err) { addLog("OCR解析エラー: GitHub Pages等で実行してください"); }
     }
 
     function addLog(msg) {
