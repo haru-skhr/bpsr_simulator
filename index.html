@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPSR シミュレーター v2.6</title>
+    <title>BPSR シミュレーター v2.8</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -18,6 +18,7 @@
             --text-dim: #94a3b8;
             --group-battle-bg: rgba(56, 189, 248, 0.05);
             --group-impact-bg: rgba(168, 85, 247, 0.05);
+            --active-glow: rgba(168, 85, 247, 0.15);
         }
 
         body {
@@ -71,15 +72,27 @@
             gap: 10px;
         }
 
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-on { background: var(--accent-green); color: #000; }
+        .status-off { background: #475569; color: var(--text-dim); }
+
         .stat-group {
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
             border: 1px solid #334155;
+            transition: all 0.3s ease;
         }
         .group-battle { background: var(--group-battle-bg); border-color: rgba(56, 189, 248, 0.2); }
-        .group-impact { background: var(--group-impact-bg); border-color: rgba(168, 85, 247, 0.2); transition: opacity 0.3s ease; }
-        .disabled-group { opacity: 0.4; pointer-events: none; }
+        .group-impact { background: var(--group-impact-bg); border-color: rgba(168, 85, 247, 0.2); }
+        .group-impact.active { background: var(--active-glow); border-color: var(--accent-purple); box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
+        .disabled-group { opacity: 0.4; pointer-events: none; filter: grayscale(0.5); }
 
         .stat-grid {
             display: grid;
@@ -163,8 +176,8 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>BPSR シミュレーター v2.6</h1>
-        <p style="color:var(--text-dim)">イマジンインパクト・トグル対応版</p>
+        <h1>BPSR シミュレーター v2.8</h1>
+        <p style="color:var(--text-dim)">UIテキスト・カテゴライズ調整版</p>
     </div>
 
     <div class="hero-stats">
@@ -211,16 +224,16 @@
     </div>
 
     <div class="section-title">
-        🧬 潜在心相晶
+        🧬 潜在心相晶：イマジンインパクト <span id="impact_badge" class="status-badge status-on">発動中</span>
         <label class="switch" style="margin-left:auto;">
             <input type="checkbox" id="toggle_impact_main" checked onchange="update()">
             <span class="slider"></span>
         </label>
     </div>
-    <div class="stat-group group-impact" id="impact_section">
+    <div class="stat-group group-impact active" id="impact_section">
         <div class="switch-row">
             <span style="font-size:0.85rem">固定枠 (幸運最終 +1.0%)</span>
-            <span style="color:var(--accent-green); font-weight:bold;">常時ON</span>
+            <span id="fixed_label" style="color:var(--accent-green); font-weight:bold;">計算中</span>
         </div>
         <div class="switch-row" style="margin-top:15px;">
             <div style="display:flex; flex-direction:column;">
@@ -261,8 +274,8 @@
 
     <div class="info-box">
         <ul style="padding-left:15px; margin:0; list-style:none;">
-            <li>・右上のスイッチで潜在心相晶（イマジンインパクト）全体のON/OFFが可能です。</li>
-            <li>・OFFにすると、固定枠(+1.0%)と選択枠の両方が計算から除外されます。</li>
+            <li>・カテゴリ名を「潜在心相晶：イマジンインパクト」に修正しました。</li>
+            <li>・マスタースイッチと連動して稼働状況が視覚的に変化します。</li>
         </ul>
     </div>
 </div>
@@ -280,11 +293,23 @@
     function update() {
         const isImpactEnabled = document.getElementById('toggle_impact_main').checked;
         const impactSection = document.getElementById('impact_section');
+        const badge = document.getElementById('impact_badge');
+        const fixedLabel = document.getElementById('fixed_label');
         
         if (isImpactEnabled) {
             impactSection.classList.remove('disabled-group');
+            impactSection.classList.add('active');
+            badge.innerText = "発動中";
+            badge.className = "status-badge status-on";
+            fixedLabel.style.color = "var(--accent-green)";
+            fixedLabel.innerText = "計算中";
         } else {
             impactSection.classList.add('disabled-group');
+            impactSection.classList.remove('active');
+            badge.innerText = "未発動";
+            badge.className = "status-badge status-off";
+            fixedLabel.style.color = "var(--text-dim)";
+            fixedLabel.innerText = "停止中";
         }
 
         const vCrit = parseFloat(document.getElementById('in_crit').value) || 0;
