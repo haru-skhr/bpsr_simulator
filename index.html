@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPSR シミュレーター v2.2</title>
+    <title>BPSR シミュレーター v2.4</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -16,7 +16,6 @@
             --accent-red: #ef4444;
             --text-main: #f1f5f9;
             --text-dim: #94a3b8;
-            --group-base-bg: rgba(239, 68, 68, 0.05);
             --group-battle-bg: rgba(56, 189, 248, 0.05);
         }
 
@@ -32,7 +31,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 800px;
             background: var(--card-bg);
             padding: 30px;
             border-radius: 16px;
@@ -60,16 +59,6 @@
         .hero-card .label { color: var(--text-dim); font-size: 0.8rem; display: block; margin-bottom: 5px; }
         .hero-card .value { font-size: 1.8rem; font-weight: bold; }
 
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 900px) {
-            .main-layout { grid-template-columns: 1fr; }
-        }
-
         .section-title {
             font-size: 1.1rem;
             font-weight: bold;
@@ -86,17 +75,8 @@
             padding: 15px;
             margin-bottom: 20px;
             border: 1px solid #334155;
-        }
-        .group-base { background: var(--group-base-bg); border-color: rgba(239, 68, 68, 0.2); }
-        .group-battle { background: var(--group-battle-bg); border-color: rgba(56, 189, 248, 0.2); }
-
-        .group-header {
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: var(--group-battle-bg);
+            border-color: rgba(56, 189, 248, 0.2);
         }
 
         .stat-grid {
@@ -112,7 +92,7 @@
             border-left: 4px solid var(--accent-blue);
         }
 
-        input[type="number"], select {
+        input[type="number"] {
             width: 100%;
             background: #0f172a;
             border: 1px solid #475569;
@@ -133,21 +113,21 @@
         }
         .pct-val { font-size: 1.1rem; font-weight: bold; }
 
-        .factor-card {
-            background: rgba(15, 23, 42, 0.4);
+        .switch-group {
+            background: rgba(15, 23, 42, 0.5);
             padding: 15px;
             border-radius: 12px;
-            border: 1px solid #475569;
+            margin-bottom: 20px;
         }
 
-        .factor-row {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+        .switch-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
+        .switch-row:last-child { margin-bottom: 0; }
 
-        /* トグルスイッチの修正 */
         .switch {
             position: relative;
             display: inline-block;
@@ -175,12 +155,12 @@
         input:checked + .slider { background-color: var(--accent-blue); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        .advice-box {
-            margin-top: 20px;
+        .info-box {
             background: rgba(15, 23, 42, 0.3);
             padding: 15px;
             border-radius: 8px;
             font-size: 0.85rem;
+            color: var(--text-dim);
         }
     </style>
 </head>
@@ -188,8 +168,8 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>BPSR シミュレーター v2.2</h1>
-        <p style="color:var(--text-dim)">手入力最適化・軽量版</p>
+        <h1>BPSR シミュレーター v2.4</h1>
+        <p style="color:var(--text-dim)">UI最適化・実数入力版</p>
     </div>
 
     <div class="hero-stats">
@@ -203,90 +183,65 @@
         </div>
     </div>
 
-    <div class="main-layout">
-        <div class="left-col">
-            <div class="section-title">📊 ステータス入力</div>
-            
-            <div class="stat-group group-base">
-                <div class="group-header" style="color:var(--accent-red);">🧬 基礎ステータス</div>
-                <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="stat-card" style="border-left-color: var(--accent-red);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">筋力</label>
-                        <input type="number" id="in_str" value="0" oninput="update()" onfocus="this.select()">
-                    </div>
-                    <div class="stat-card" style="border-left-color: var(--accent-gold);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">敏捷</label>
-                        <input type="number" id="in_agi" value="0" oninput="update()" onfocus="this.select()">
-                        <div style="font-size:0.6rem; color:var(--accent-gold); margin-top:2px;">速度寄与:+<span id="agi_to_fast">0</span></div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: var(--accent-purple);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">知力</label>
-                        <input type="number" id="in_int" value="0" oninput="update()" onfocus="this.select()">
-                    </div>
-                </div>
+    <div class="section-title">📊 ステータス入力</div>
+    
+    <div class="stat-group">
+        <div class="stat-grid">
+            <!-- 会心 -->
+            <div class="stat-card" style="border-left-color: var(--accent-pink);">
+                <label style="font-size:0.7rem; color:var(--text-dim);">会心 (実数)</label>
+                <input type="number" id="in_crit" value="0" oninput="update()" onfocus="this.select()">
+                <div class="pct-box"><span class="pct-val" id="out_crit">5.00%</span></div>
             </div>
-
-            <div class="stat-group group-battle">
-                <div class="group-header" style="color:var(--accent-blue);">⚔️ 戦闘ステータス</div>
-                <div class="stat-grid">
-                    <div class="stat-card" style="border-left-color: var(--accent-pink);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">会心 (実数)</label>
-                        <input type="number" id="in_crit" value="0" oninput="update()" onfocus="this.select()">
-                        <div class="pct-box"><span class="pct-val" id="out_crit">5.00%</span></div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: var(--accent-blue);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">ファスト (実数)</label>
-                        <input type="number" id="in_fast" value="0" oninput="update()" onfocus="this.select()">
-                        <div class="pct-box"><span class="pct-val" id="out_fast">0.00%</span></div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: var(--accent-purple);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">器用さ (実数)</label>
-                        <input type="number" id="in_dex" value="0" oninput="update()" onfocus="this.select()">
-                        <div class="pct-box"><span class="pct-val" id="out_dex">6.00%</span></div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: var(--accent-green);">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">幸運 (実数)</label>
-                        <input type="number" id="in_luck" value="0" oninput="update()" onfocus="this.select()">
-                        <div class="pct-box"><span class="pct-val" id="out_luck">5.00%</span></div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: var(--accent-gold); grid-column: span 2;">
-                        <label style="font-size:0.7rem; color:var(--text-dim);">万能 (実数)</label>
-                        <input type="number" id="in_omni" value="0" oninput="update()" onfocus="this.select()">
-                        <div class="pct-box"><span class="pct-val" id="out_omni">0.00%</span></div>
-                    </div>
-                </div>
+            <!-- ファスト -->
+            <div class="stat-card" style="border-left-color: var(--accent-blue);">
+                <label style="font-size:0.7rem; color:var(--text-dim);">ファスト (実数)</label>
+                <input type="number" id="in_fast" value="0" oninput="update()" onfocus="this.select()">
+                <div class="pct-box"><span class="pct-val" id="out_fast">0.00%</span></div>
             </div>
-
-            <div class="stat-card" style="border-left:none; background:rgba(15,23,42,0.5);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:0.8rem">ストームブレイド (速度1.6x)</span>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle_storm" checked onchange="update()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.8rem">武器補正 (幸運+6.0%)</span>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle_weapon" checked onchange="update()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+            <!-- 幸運 -->
+            <div class="stat-card" style="border-left-color: var(--accent-green);">
+                <label style="font-size:0.7rem; color:var(--text-dim);">幸運 (実数)</label>
+                <input type="number" id="in_luck" value="0" oninput="update()" onfocus="this.select()">
+                <div class="pct-box"><span class="pct-val" id="out_luck">5.00%</span></div>
+            </div>
+            <!-- 器用さ -->
+            <div class="stat-card" style="border-left-color: var(--accent-purple);">
+                <label style="font-size:0.7rem; color:var(--text-dim);">器用さ (実数)</label>
+                <input type="number" id="in_dex" value="0" oninput="update()" onfocus="this.select()">
+                <div class="pct-box"><span class="pct-val" id="out_dex">6.00%</span></div>
+            </div>
+            <!-- 万能 -->
+            <div class="stat-card" style="border-left-color: var(--accent-gold); grid-column: span 2;">
+                <label style="font-size:0.7rem; color:var(--text-dim);">万能 (実数)</label>
+                <input type="number" id="in_omni" value="0" oninput="update()" onfocus="this.select()">
+                <div class="pct-box"><span class="pct-val" id="out_omni">0.00%</span></div>
             </div>
         </div>
+    </div>
 
-        <div class="right-col">
-            <div class="section-title">🧬 因子設定</div>
-            <div class="factor-card" id="slots_container"></div>
-            <div class="advice-box">
-                <h3 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--accent-blue);">インフォメーション</h3>
-                <ul style="padding-left:15px; margin:0; list-style:none; color:var(--text-dim); font-size:0.75rem;">
-                    <li>・筋力/敏捷/知力と戦闘ステータスを分離しました。</li>
-                    <li>・トグルスイッチの動作を修正しました。</li>
-                    <li>・外部ライブラリを削除し、ローカルでの動作を安定させました。</li>
-                </ul>
-            </div>
+    <div class="switch-group">
+        <div class="switch-row">
+            <span style="font-size:0.8rem">ストームブレイド (速度1.6x)</span>
+            <label class="switch">
+                <input type="checkbox" id="toggle_storm" checked onchange="update()">
+                <span class="slider"></span>
+            </label>
         </div>
+        <div class="switch-row">
+            <span style="font-size:0.8rem">武器補正 (幸運+6.0%)</span>
+            <label class="switch">
+                <input type="checkbox" id="toggle_weapon" checked onchange="update()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <ul style="padding-left:15px; margin:0; list-style:none;">
+            <li>・UI順序を変更しました（会心・ファスト・幸運・器用さ・万能）。</li>
+            <li>・因子の効果を含めたステータス画面の実数値を入力してください。</li>
+        </ul>
     </div>
 </div>
 
@@ -294,41 +249,6 @@
     const K_GEN = 19972;
     const K_OMNI = 11200;
     const BASES = { crit: 5.0, fast: 0.0, luck: 5.0, dex: 6.0, omni: 0.0 };
-    const FACTOR_DATA = {
-        1: { a: 0.0212, b: 0.0106 }, 2: { a: 0.0357, b: 0.0178 }, 3: { a: 0.0502, b: 0.0251 },
-        4: { a: 0.0647, b: 0.0323 }, 5: { a: 0.0793, b: 0.0396 }, 6: { a: 0.0904, b: 0.0452 },
-        7: { a: 0.1015, b: 0.0507 }, 8: { a: 0.1127, b: 0.0563 }, 9: { a: 0.1238, b: 0.0619 },
-        10: { a: 0.1350, b: 0.0675 }
-    };
-    const TYPES = [
-        { id: 'none', label: '--- 未設定 ---' },
-        { id: 'X1', label: '極性X1（全属性強度）' }, { id: 'X2', label: '極性X2（筋力）' },
-        { id: 'X3', label: '極性X3（知力）' }, { id: 'X4', label: '極性X4（敏捷）' },
-        { id: 'X5', label: '極性X5（会心↑/器用↓）' }, { id: 'X6', label: '極性X6（幸運↑/ファスト↓）' },
-        { id: 'X7', label: '極性X7（器用↑/幸運↓）' }, { id: 'X8', label: '極性X8（ファスト↑/会心↓）' }
-    ];
-
-    function init() {
-        const container = document.getElementById('slots_container');
-        for(let i=1; i<=3; i++) {
-            const div = document.createElement('div');
-            div.style.marginBottom = i < 3 ? '20px' : '0';
-            div.innerHTML = `
-                <label style="font-size:0.75rem; color:var(--text-dim);">因子スロット ${i}</label>
-                <div class="factor-row">
-                    <select id="type${i}" onchange="update()">
-                        ${TYPES.map(t => `<option value="${t.id}">${t.label}</option>`).join('')}
-                    </select>
-                    <select id="rank${i}" onchange="update()">
-                        <option value="0">ランク</option>
-                        ${[...Array(10)].map((_, idx) => `<option value="${idx+1}">G${idx+1}</option>`).join('')}
-                    </select>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-        update();
-    }
 
     function calcRawPct(raw, k) {
         if (!raw || raw < 0) return 0;
@@ -336,35 +256,16 @@
     }
 
     function update() {
-        const vAgi = parseFloat(document.getElementById('in_agi').value) || 0;
-        const vDex = parseFloat(document.getElementById('in_dex').value) || 0;
         const vCrit = parseFloat(document.getElementById('in_crit').value) || 0;
-        const vFastBase = parseFloat(document.getElementById('in_fast').value) || 0;
+        const vFast = parseFloat(document.getElementById('in_fast').value) || 0;
         const vLuck = parseFloat(document.getElementById('in_luck').value) || 0;
+        const vDex  = parseFloat(document.getElementById('in_dex').value) || 0;
         const vOmni = parseFloat(document.getElementById('in_omni').value) || 0;
 
-        const agiAddFast = Math.floor(vAgi * 0.45);
-        document.getElementById('agi_to_fast').innerText = agiAddFast;
-        const vFast = vFastBase + agiAddFast;
-
-        let mCrit = 1.0, mFast = 1.0, mLuck = 1.0, mDex = 1.0;
-        for(let i=1; i<=3; i++) {
-            const type = document.getElementById('type'+i).value;
-            const rIdx = parseInt(document.getElementById('rank'+i).value);
-            if (type === 'none' || rIdx === 0) continue;
-            const data = FACTOR_DATA[rIdx];
-            switch(type) {
-                case 'X5': mCrit += data.a; mDex -= data.b; break;
-                case 'X6': mLuck += data.a; mFast -= data.b; break;
-                case 'X7': mDex += data.a; mLuck -= data.b; break;
-                case 'X8': mFast += data.a; mCrit -= data.b; break;
-            }
-        }
-
-        const rCrit = Math.max(0, Math.floor((BASES.crit + calcRawPct(vCrit * mCrit, K_GEN)) * 100) / 100);
-        const rFast = Math.max(0, Math.floor((BASES.fast + calcRawPct(vFast * mFast, K_GEN)) * 100) / 100);
-        const rLuck = Math.max(0, Math.floor((BASES.luck + calcRawPct(vLuck * mLuck, K_GEN) + (document.getElementById('toggle_weapon').checked?6:0)) * 100) / 100);
-        const rDex  = Math.max(0, Math.floor((BASES.dex + calcRawPct(vDex * mDex, K_GEN)) * 100) / 100);
+        const rCrit = Math.max(0, Math.floor((BASES.crit + calcRawPct(vCrit, K_GEN)) * 100) / 100);
+        const rFast = Math.max(0, Math.floor((BASES.fast + calcRawPct(vFast, K_GEN)) * 100) / 100);
+        const rLuck = Math.max(0, Math.floor((BASES.luck + calcRawPct(vLuck, K_GEN) + (document.getElementById('toggle_weapon').checked?6:0)) * 100) / 100);
+        const rDex  = Math.max(0, Math.floor((BASES.dex + calcRawPct(vDex, K_GEN)) * 100) / 100);
         const rOmni = Math.max(0, Math.floor((BASES.omni + calcRawPct(vOmni, K_OMNI)) * 100) / 100);
 
         document.getElementById('out_crit').innerText = rCrit.toFixed(2) + "%";
@@ -372,10 +273,12 @@
         document.getElementById('out_luck').innerText = rLuck.toFixed(2) + "%";
         document.getElementById('out_dex').innerText = rDex.toFixed(2) + "%";
         document.getElementById('out_omni').innerText = rOmni.toFixed(2) + "%";
+        
         document.getElementById('disp_speed').innerText = (rFast * (document.getElementById('toggle_storm').checked ? 1.6 : 1.0)).toFixed(2) + "%";
         document.getElementById('disp_dmg').innerText = (rOmni * 0.35).toFixed(2) + "%";
     }
-    init();
+    
+    update();
 </script>
 </body>
 </html>
