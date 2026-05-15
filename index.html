@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPSR シミュレーター v2.8</title>
+    <title>BPSR シミュレーター</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -13,7 +13,6 @@
             --accent-pink: #f472b6;
             --accent-green: #4ade80;
             --accent-purple: #a855f7;
-            --accent-red: #ef4444;
             --text-main: #f1f5f9;
             --text-dim: #94a3b8;
             --group-battle-bg: rgba(56, 189, 248, 0.05);
@@ -26,84 +25,79 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             justify-content: center;
         }
 
         .app-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 450px;
             background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
+            padding: 15px;
+            border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             border: 1px solid #334155;
         }
 
-        .header { text-align: center; margin-bottom: 30px; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .header h1 { 
+            font-size: 1.25rem; 
+            margin: 0; 
+            letter-spacing: 0.02em;
+        }
 
         .hero-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .hero-card {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid var(--accent-blue);
+            background: rgba(15, 23, 42, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: left;
+            border-left: 4px solid var(--accent-blue);
         }
 
-        .hero-card .label { color: var(--text-dim); font-size: 0.8rem; display: block; margin-bottom: 5px; }
-        .hero-card .value { font-size: 1.8rem; font-weight: bold; }
+        .hero-card .label { color: var(--text-dim); font-size: 0.65rem; display: block; margin-bottom: 2px; }
+        .hero-card .value { font-size: 1.05rem; font-weight: bold; }
 
         .section-title {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: bold;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
             border-bottom: 2px solid #334155;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-
-        .status-badge {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-on { background: var(--accent-green); color: #000; }
-        .status-off { background: #475569; color: var(--text-dim); }
 
         .stat-group {
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 12px;
             border: 1px solid #334155;
             transition: all 0.3s ease;
         }
         .group-battle { background: var(--group-battle-bg); border-color: rgba(56, 189, 248, 0.2); }
         .group-impact { background: var(--group-impact-bg); border-color: rgba(168, 85, 247, 0.2); }
-        .group-impact.active { background: var(--active-glow); border-color: var(--accent-purple); box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
+        .group-impact.active { background: var(--active-glow); border-color: var(--accent-purple); }
         .disabled-group { opacity: 0.4; pointer-events: none; filter: grayscale(0.5); }
 
         .stat-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 8px;
         }
 
         .stat-card {
             background: rgba(15, 23, 42, 0.4);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 6px;
             border-left: 4px solid var(--accent-blue);
         }
 
@@ -112,9 +106,9 @@
             background: #0f172a;
             border: 1px solid #475569;
             color: white;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 1rem;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.85rem;
             box-sizing: border-box;
         }
 
@@ -122,25 +116,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 6px;
-            padding-top: 6px;
+            margin-top: 3px;
+            padding-top: 3px;
             border-top: 1px dashed #334155;
         }
-        .pct-val { font-size: 1.1rem; font-weight: bold; }
+        .pct-val { font-size: 0.9rem; font-weight: bold; }
 
         .switch-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         .switch-row:last-child { margin-bottom: 0; }
 
         .switch {
             position: relative;
             display: inline-block;
-            width: 40px;
-            height: 20px;
+            width: 32px;
+            height: 16px;
         }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -149,43 +143,35 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: #475569;
             transition: .3s;
-            border-radius: 20px;
+            border-radius: 16px;
         }
         .slider:before {
             position: absolute;
             content: "";
-            height: 14px; width: 14px;
+            height: 10px; width: 10px;
             left: 3px; bottom: 3px;
             background-color: white;
             transition: .3s;
             border-radius: 50%;
         }
         input:checked + .slider { background-color: var(--accent-blue); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        input:checked + .slider:before { transform: translateX(16px); }
 
-        .info-box {
-            background: rgba(15, 23, 42, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="header">
-        <h1>BPSR シミュレーター v2.8</h1>
-        <p style="color:var(--text-dim)">UIテキスト・カテゴライズ調整版</p>
+        <h1>BPSR シミュレーター</h1>
     </div>
 
     <div class="hero-stats">
-        <div class="hero-card" style="border-color: var(--accent-gold);">
+        <div class="hero-card" style="border-left-color: var(--accent-gold);">
             <span class="label">攻撃速度増加</span>
             <span class="value" id="disp_speed" style="color:var(--accent-gold)">0.00%</span>
         </div>
-        <div class="hero-card" style="border-color: var(--accent-blue);">
+        <div class="hero-card" style="border-left-color: var(--accent-blue);">
             <span class="label">与ダメ上昇(万能)</span>
             <span class="value" id="disp_dmg" style="color:var(--accent-blue)">0.00%</span>
         </div>
@@ -196,27 +182,27 @@
     <div class="stat-group group-battle">
         <div class="stat-grid">
             <div class="stat-card" style="border-left-color: var(--accent-pink);">
-                <label style="font-size:0.7rem; color:var(--text-dim);">会心 (実数)</label>
+                <label style="font-size:0.6rem; color:var(--text-dim);">会心 (実数)</label>
                 <input type="number" id="in_crit" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_crit">5.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-blue);">
-                <label style="font-size:0.7rem; color:var(--text-dim);">ファスト (実数)</label>
+                <label style="font-size:0.6rem; color:var(--text-dim);">ファスト (実数)</label>
                 <input type="number" id="in_fast" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_fast">0.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-green);">
-                <label style="font-size:0.7rem; color:var(--text-dim);">幸運 (実数)</label>
+                <label style="font-size:0.6rem; color:var(--text-dim);">幸運 (実数)</label>
                 <input type="number" id="in_luck" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_luck">5.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-purple);">
-                <label style="font-size:0.7rem; color:var(--text-dim);">器用さ (実数)</label>
+                <label style="font-size:0.6rem; color:var(--text-dim);">器用さ (実数)</label>
                 <input type="number" id="in_dex" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_dex">6.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-gold); grid-column: span 2;">
-                <label style="font-size:0.7rem; color:var(--text-dim);">万能 (実数)</label>
+                <label style="font-size:0.6rem; color:var(--text-dim);">万能 (実数)</label>
                 <input type="number" id="in_omni" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_omni">0.00%</span></div>
             </div>
@@ -224,24 +210,21 @@
     </div>
 
     <div class="section-title">
-        🧬 潜在心相晶：イマジンインパクト <span id="impact_badge" class="status-badge status-on">発動中</span>
+        🧬 潜在心相晶：イマジンインパクト
         <label class="switch" style="margin-left:auto;">
-            <input type="checkbox" id="toggle_impact_main" checked onchange="update()">
+            <input type="checkbox" id="toggle_impact_main" onchange="update()">
             <span class="slider"></span>
         </label>
     </div>
-    <div class="stat-group group-impact active" id="impact_section">
+    <div class="stat-group group-impact disabled-group" id="impact_section">
         <div class="switch-row">
-            <span style="font-size:0.85rem">固定枠 (幸運最終 +1.0%)</span>
-            <span id="fixed_label" style="color:var(--accent-green); font-weight:bold;">計算中</span>
+            <span style="font-size:0.75rem">固定枠 (幸運最終 +1.0%)</span>
+            <span id="fixed_label" style="color:var(--text-dim); font-size:0.75rem;">停止中</span>
         </div>
-        <div class="switch-row" style="margin-top:15px;">
-            <div style="display:flex; flex-direction:column;">
-                <span style="font-size:0.85rem">選択枠 (幸運最終 +1.0～3.0%)</span>
-                <span style="font-size:0.7rem; color:var(--text-dim);">投影ノードでの選択効果</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <select id="impact_val" style="width:70px; padding:4px;" onchange="update()">
+        <div class="switch-row" style="margin-top:8px;">
+            <span style="font-size:0.75rem">選択枠 (+1.0～3.0%)</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+                <select id="impact_val" style="width:55px; padding:2px; font-size:0.75rem;" onchange="update()">
                     <option value="1.0">1.0%</option>
                     <option value="2.0">2.0%</option>
                     <option value="3.0">3.0%</option>
@@ -257,26 +240,19 @@
     <div class="section-title">⚙️ その他補正</div>
     <div class="stat-group" style="background:rgba(15,23,42,0.4);">
         <div class="switch-row">
-            <span style="font-size:0.85rem">ストームブレイド (速度1.6x)</span>
+            <span style="font-size:0.75rem">ストームブレイド (速度1.6x)</span>
             <label class="switch">
-                <input type="checkbox" id="toggle_storm" checked onchange="update()">
+                <input type="checkbox" id="toggle_storm" onchange="update()">
                 <span class="slider"></span>
             </label>
         </div>
         <div class="switch-row">
-            <span style="font-size:0.85rem">武器補正 (幸運+6.0%)</span>
+            <span style="font-size:0.75rem">武器補正 (幸運+6.0%)</span>
             <label class="switch">
-                <input type="checkbox" id="toggle_weapon" checked onchange="update()">
+                <input type="checkbox" id="toggle_weapon" onchange="update()">
                 <span class="slider"></span>
             </label>
         </div>
-    </div>
-
-    <div class="info-box">
-        <ul style="padding-left:15px; margin:0; list-style:none;">
-            <li>・カテゴリ名を「潜在心相晶：イマジンインパクト」に修正しました。</li>
-            <li>・マスタースイッチと連動して稼働状況が視覚的に変化します。</li>
-        </ul>
     </div>
 </div>
 
@@ -293,21 +269,16 @@
     function update() {
         const isImpactEnabled = document.getElementById('toggle_impact_main').checked;
         const impactSection = document.getElementById('impact_section');
-        const badge = document.getElementById('impact_badge');
         const fixedLabel = document.getElementById('fixed_label');
         
         if (isImpactEnabled) {
             impactSection.classList.remove('disabled-group');
             impactSection.classList.add('active');
-            badge.innerText = "発動中";
-            badge.className = "status-badge status-on";
             fixedLabel.style.color = "var(--accent-green)";
             fixedLabel.innerText = "計算中";
         } else {
             impactSection.classList.add('disabled-group');
             impactSection.classList.remove('active');
-            badge.innerText = "未発動";
-            badge.className = "status-badge status-off";
             fixedLabel.style.color = "var(--text-dim)";
             fixedLabel.innerText = "停止中";
         }
@@ -320,7 +291,7 @@
 
         let extraLuck = 0;
         if (isImpactEnabled) {
-            extraLuck += 1.0; // 固定枠
+            extraLuck += 1.0; 
             if (document.getElementById('toggle_impact_sub').checked) {
                 extraLuck += parseFloat(document.getElementById('impact_val').value);
             }
