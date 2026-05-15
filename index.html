@@ -32,130 +32,138 @@
 
         .app-container {
             width: 100%;
-            max-width: 450px;
+            max-width: 600px;
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             border: 1px solid #334155;
         }
 
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { 
-            font-size: 1.25rem; 
-            margin: 0; 
-            letter-spacing: 0.02em;
-        }
-
+        .header { text-align: center; margin-bottom: 20px; }
+        
         .hero-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
-
         .hero-card {
             background: rgba(15, 23, 42, 0.4);
-            padding: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: left;
             border-left: 4px solid var(--accent-blue);
         }
-
-        .hero-card .label { color: var(--text-dim); font-size: 0.65rem; display: block; margin-bottom: 2px; }
-        .hero-card .value { font-size: 1.05rem; font-weight: bold; }
-
         .section-title {
-            font-size: 0.95rem;
             font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 6px;
             border-bottom: 2px solid #334155;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-
         .stat-group {
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 12px;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
             border: 1px solid #334155;
             transition: all 0.3s ease;
         }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .stat-card {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        /* --- レスポンシブ調整 --- */
+
+        /* スマホ向け (480px以下) */
+        @media screen and (max-width: 480px) {
+            .header h1 { font-size: 1.25rem; }
+            .hero-card { padding: 10px; }
+            .hero-card .label { font-size: 0.65rem; margin-bottom: 2px; }
+            .hero-card .value { font-size: 1.05rem; }
+            .section-title { font-size: 0.9rem; margin-bottom: 10px; }
+            .stat-group { padding: 10px; margin-bottom: 12px; }
+            .stat-card { padding: 8px; }
+            .stat-card label { font-size: 0.6rem !important; }
+            .pct-val { font-size: 0.9rem; }
+            input[type="number"], select { font-size: 0.85rem; padding: 5px; }
+            .switch { width: 32px; height: 16px; }
+            .slider:before { height: 10px; width: 10px; left: 3px; bottom: 3px; }
+            input:checked + .slider:before { transform: translateX(16px); }
+            .switch-row span { font-size: 0.75rem !important; }
+        }
+
+        /* PC・タブレット向け (481px以上) */
+        @media screen and (min-width: 481px) {
+            .header h1 { font-size: 1.8rem; }
+            .hero-card { padding: 15px; }
+            .hero-card .label { font-size: 0.75rem; margin-bottom: 4px; }
+            .hero-card .value { font-size: 1.3rem; }
+            .section-title { font-size: 1.1rem; }
+            .stat-card { padding: 12px; }
+            .stat-card label { font-size: 0.7rem !important; }
+            .pct-val { font-size: 1.1rem; }
+            input[type="number"], select { font-size: 1rem; padding: 8px; }
+            .switch { width: 40px; height: 20px; }
+            .slider:before { height: 14px; width: 14px; left: 3px; bottom: 3px; }
+            input:checked + .slider:before { transform: translateX(20px); }
+            .switch-row span { font-size: 0.85rem !important; }
+        }
+
+        /* --- 共通コンポーネント --- */
         .group-battle { background: var(--group-battle-bg); border-color: rgba(56, 189, 248, 0.2); }
         .group-impact { background: var(--group-impact-bg); border-color: rgba(168, 85, 247, 0.2); }
         .group-impact.active { background: var(--active-glow); border-color: var(--accent-purple); }
         .disabled-group { opacity: 0.4; pointer-events: none; filter: grayscale(0.5); }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .stat-card {
-            background: rgba(15, 23, 42, 0.4);
-            padding: 8px;
-            border-radius: 6px;
-            border-left: 4px solid var(--accent-blue);
-        }
-
+        
         input[type="number"], select {
             width: 100%;
             background: #0f172a;
             border: 1px solid #475569;
             color: white;
-            padding: 5px;
-            border-radius: 4px;
-            font-size: 0.85rem;
             box-sizing: border-box;
+            border-radius: 4px;
         }
 
         .pct-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 3px;
-            padding-top: 3px;
+            margin-top: 5px;
+            padding-top: 5px;
             border-top: 1px dashed #334155;
         }
-        .pct-val { font-size: 0.9rem; font-weight: bold; }
+        .pct-val { font-weight: bold; }
 
         .switch-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .switch-row:last-child { margin-bottom: 0; }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 32px;
-            height: 16px;
-        }
+        .switch { position: relative; display: inline-block; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute;
-            cursor: pointer;
+            position: absolute; cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #475569;
-            transition: .3s;
-            border-radius: 16px;
+            background-color: #475569; transition: .3s; border-radius: 20px;
         }
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 10px; width: 10px;
-            left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
+            position: absolute; content: "";
+            background-color: white; transition: .3s; border-radius: 50%;
         }
         input:checked + .slider { background-color: var(--accent-blue); }
-        input:checked + .slider:before { transform: translateX(16px); }
 
     </style>
 </head>
@@ -182,27 +190,27 @@
     <div class="stat-group group-battle">
         <div class="stat-grid">
             <div class="stat-card" style="border-left-color: var(--accent-pink);">
-                <label style="font-size:0.6rem; color:var(--text-dim);">会心 (実数)</label>
+                <label style="color:var(--text-dim);">会心 (実数)</label>
                 <input type="number" id="in_crit" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_crit">5.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-blue);">
-                <label style="font-size:0.6rem; color:var(--text-dim);">ファスト (実数)</label>
+                <label style="color:var(--text-dim);">ファスト (実数)</label>
                 <input type="number" id="in_fast" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_fast">0.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-green);">
-                <label style="font-size:0.6rem; color:var(--text-dim);">幸運 (実数)</label>
+                <label style="color:var(--text-dim);">幸運 (実数)</label>
                 <input type="number" id="in_luck" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_luck">5.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-purple);">
-                <label style="font-size:0.6rem; color:var(--text-dim);">器用さ (実数)</label>
+                <label style="color:var(--text-dim);">器用さ (実数)</label>
                 <input type="number" id="in_dex" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_dex">6.00%</span></div>
             </div>
             <div class="stat-card" style="border-left-color: var(--accent-gold); grid-column: span 2;">
-                <label style="font-size:0.6rem; color:var(--text-dim);">万能 (実数)</label>
+                <label style="color:var(--text-dim);">万能 (実数)</label>
                 <input type="number" id="in_omni" value="0" oninput="update()" onfocus="this.select()">
                 <div class="pct-box"><span class="pct-val" id="out_omni">0.00%</span></div>
             </div>
@@ -218,13 +226,13 @@
     </div>
     <div class="stat-group group-impact disabled-group" id="impact_section">
         <div class="switch-row">
-            <span style="font-size:0.75rem">固定枠 (幸運最終 +1.0%)</span>
-            <span id="fixed_label" style="color:var(--text-dim); font-size:0.75rem;">停止中</span>
+            <span>固定枠 (幸運最終 +1.0%)</span>
+            <span id="fixed_label" style="color:var(--text-dim); font-weight:bold;">停止中</span>
         </div>
-        <div class="switch-row" style="margin-top:8px;">
-            <span style="font-size:0.75rem">選択枠 (+1.0～3.0%)</span>
-            <div style="display:flex; align-items:center; gap:6px;">
-                <select id="impact_val" style="width:55px; padding:2px; font-size:0.75rem;" onchange="update()">
+        <div class="switch-row" style="margin-top:10px;">
+            <span>選択枠 (+1.0～3.0%)</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <select id="impact_val" style="width:65px; padding:3px;" onchange="update()">
                     <option value="1.0">1.0%</option>
                     <option value="2.0">2.0%</option>
                     <option value="3.0">3.0%</option>
@@ -240,14 +248,14 @@
     <div class="section-title">⚙️ その他補正</div>
     <div class="stat-group" style="background:rgba(15,23,42,0.4);">
         <div class="switch-row">
-            <span style="font-size:0.75rem">ストームブレイド (速度1.6x)</span>
+            <span>ストームブレイド (速度1.6x)</span>
             <label class="switch">
                 <input type="checkbox" id="toggle_storm" onchange="update()">
                 <span class="slider"></span>
             </label>
         </div>
         <div class="switch-row">
-            <span style="font-size:0.75rem">武器補正 (幸運+6.0%)</span>
+            <span>武器補正 (幸運+6.0%)</span>
             <label class="switch">
                 <input type="checkbox" id="toggle_weapon" onchange="update()">
                 <span class="slider"></span>
