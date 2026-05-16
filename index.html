@@ -132,6 +132,30 @@
         </div>
     </div>
 
+    <div class="section-title">⚔️ バトルイマジン</div>
+    <div class="stat-group" style="background: var(--group-imagine-bg);">
+        <div class="stat-grid">
+            <div class="imagine-slot">
+                <select id="sel_slotA" onchange="onImagineTypeChange('slotA')">
+                    <option value="">― Slot A ―</option>
+                    <option value="mukboss">ムークボス (会心)</option>
+                    <option value="heaven">ヘヴンスカイ (速度)</option>
+                </select>
+                <select id="grade_slotA" onchange="update()" style="margin-top:5px; font-size:0.8rem; color:var(--accent-gold);"></select>
+                <button id="btn_slotA" class="active-btn" onclick="toggleBtn('slotA')">OFF</button>
+            </div>
+            <div class="imagine-slot">
+                <select id="sel_slotB" onchange="onImagineTypeChange('slotB')">
+                    <option value="">― Slot B ―</option>
+                    <option value="mukboss">ムークボス (会心)</option>
+                    <option value="heaven">ヘヴンスカイ (速度)</option>
+                </select>
+                <select id="grade_slotB" onchange="update()" style="margin-top:5px; font-size:0.8rem; color:var(--accent-gold);"></select>
+                <button id="btn_slotB" class="active-btn" onclick="toggleBtn('slotB')">OFF</button>
+            </div>
+        </div>
+    </div>
+
     <div class="section-title">💎 装備補正</div>
     <div class="stat-group" style="background: var(--group-buff-bg);">
         <div class="stat-grid">
@@ -143,14 +167,6 @@
         <div class="stat-grid" style="margin-top: 10px;">
             <div class="buff-card"><label>武器(速%)</label><select id="buff_weapon_spd" onchange="update()"><option value="0">0%</option><option value="2.5">2.5%</option><option value="3">3%</option><option value="3.5">3.5%</option></select></div>
             <div class="buff-card" style="border-left-color: var(--accent-red);"><label>赤武器 (幸運+6%)</label><select id="buff_red_weapon" onchange="update()"><option value="0">なし</option><option value="6">あり</option></select></div>
-        </div>
-    </div>
-
-    <div class="section-title">⚔️ バトルイマジン</div>
-    <div class="stat-group" style="background: var(--group-imagine-bg);">
-        <div class="stat-grid">
-            <div class="imagine-slot"><select id="sel_slotA" onchange="onImagineTypeChange('slotA')"><option value="">― Slot A ―</option><option value="mukboss">ムークボス (会心)</option><option value="heaven">ヘヴンスカイ (速度)</option></select><select id="grade_slotA" onchange="update()" style="margin-top:5px; font-size:0.8rem; color:var(--accent-gold);"></select><button id="btn_slotA" class="active-btn" onclick="toggleBtn('slotA')">OFF</button></div>
-            <div class="imagine-slot"><select id="sel_slotB" onchange="onImagineTypeChange('slotB')"><option value="">― Slot B ―</option><option value="mukboss">ムークボス (会心)</option><option value="heaven">ヘヴンスカイ (速度)</option></select><select id="grade_slotB" onchange="update()" style="margin-top:5px; font-size:0.8rem; color:var(--accent-gold);"></select><button id="btn_slotB" class="active-btn" onclick="toggleBtn('slotB')">OFF</button></div>
         </div>
     </div>
 
@@ -257,6 +273,7 @@
         const isImpact = document.getElementById('toggle_impact_main').checked;
         document.getElementById('impact_section').classList.toggle('disabled-group', !isImpact);
 
+        // --- 因子の基礎計算 ---
         let f = { crit: 0, fast: 0, luck: 0, dex: 0, omni: 0 };
         ['A', 'B'].forEach(slot => {
             const type = document.getElementById('f_type_' + slot).value;
@@ -269,6 +286,7 @@
             }
         });
 
+        // --- 入力値取得 ---
         const rawInputs = {
             crit: parseFloat(document.getElementById('in_crit').value) || 0,
             fast: parseFloat(document.getElementById('in_fast').value) || 0,
@@ -277,9 +295,11 @@
             omni: parseFloat(document.getElementById('in_omni').value) || 0
         };
 
+        // 1位ボーナス対象（入力値ベース）
         let baseMaxKey = 'crit';
         for (let k in rawInputs) { if (rawInputs[k] > rawInputs[baseMaxKey]) baseMaxKey = k; }
 
+        // --- イマジン実数加算 ---
         let ex = { crit: 0, fast: 0, luck: 0, dex: 0, omni: 0 };
         ['slotA', 'slotB'].forEach(slot => {
             const type = document.getElementById('sel_' + slot).value;
@@ -290,10 +310,13 @@
             }
         });
 
+        // 因子を加味した逆算ベース値
         let combinedRaw = {};
         for (let k in rawInputs) {
             combinedRaw[k] = (rawInputs[k] / (1 + f[k])) + ex[k];
         }
+
+        // 最終的な実数1位（ボーンス転送先）の決定
         let finalMaxKey = baseMaxKey;
         let currentMaxVal = combinedRaw[baseMaxKey];
         for (let k in combinedRaw) {
@@ -303,6 +326,7 @@
             }
         }
 
+        // 最終実数の算出（800移動処理）
         let finalStatusRaw = {};
         for (let k in rawInputs) {
             let base = combinedRaw[k] * (1 + f[k]);
@@ -313,6 +337,7 @@
             finalStatusRaw[k] = Math.round(base);
         }
 
+        // --- %変換 ---
         let r = {
             crit: BASES.crit + (finalStatusRaw.crit / (finalStatusRaw.crit + K_GEN) * 100),
             fast: BASES.fast + (finalStatusRaw.fast / (finalStatusRaw.fast + K_GEN) * 100),
@@ -321,10 +346,12 @@
             omni: BASES.omni + (finalStatusRaw.omni / (finalStatusRaw.omni + K_OMNI) * 100)
         };
 
+        // --- 割合1位クラスボーナス ---
         let topPctKey = 'crit';
         for (let k in r) { if(r[k] > r[topPctKey]) topPctKey = k; }
         if (activeClass === 'frost') r[topPctKey] += 3.5;
 
+        // --- 特殊加算(速度/幸運) ---
         ['slotA', 'slotB'].forEach(slot => {
             const type = document.getElementById('sel_' + slot).value;
             const active = document.getElementById('btn_' + slot).classList.contains('active');
@@ -337,12 +364,14 @@
             if (document.getElementById('toggle_impact_sub').checked) r.luck += parseFloat(document.getElementById('impact_val').value);
         }
 
+        // --- UI反映 ---
         ['crit', 'fast', 'luck', 'dex', 'omni'].forEach(k => {
             document.getElementById('out_' + k).innerText = floor2(r[k]).toFixed(2) + "% (" + finalStatusRaw[k] + ")";
             document.getElementById('bonus_' + k).style.display = (k === finalMaxKey) ? 'block' : 'none';
             document.getElementById('class_' + k).style.display = (activeClass === 'frost' && k === topPctKey) ? 'block' : 'none';
         });
 
+        // --- 最終SPD / 万能与ダメ計算 ---
         const equipSpd = (parseFloat(document.getElementById('buff_ear').value)||0) + (parseFloat(document.getElementById('buff_neck').value)||0) + (parseFloat(document.getElementById('buff_ring').value)||0) + (parseFloat(document.getElementById('buff_talisman').value)||0) + (parseFloat(document.getElementById('buff_weapon_spd').value)||0);
         let ratio = (activeClass === 'storm') ? 1.6 : (activeClass === 'frost' ? 0.2 : 0.6);
         document.getElementById('disp_speed').innerText = floor2((r.fast * ratio) + equipSpd).toFixed(2) + "%";
@@ -388,7 +417,7 @@
             }
         };
         localStorage.setItem('bpsr_config', JSON.stringify(data));
-        alert('保存しました。');
+        alert('構成を保存しました。');
     }
 
     function loadData() {
@@ -407,10 +436,12 @@
         onImagineTypeChange('slotA');
         document.getElementById('grade_slotA').value = data.imagine.slotA_grade;
         if (data.imagine.slotA_active) document.getElementById('btn_slotA').classList.add('active');
+        else document.getElementById('btn_slotA').classList.remove('active');
         document.getElementById('sel_slotB').value = data.imagine.slotB_type;
         onImagineTypeChange('slotB');
         document.getElementById('grade_slotB').value = data.imagine.slotB_grade;
         if (data.imagine.slotB_active) document.getElementById('btn_slotB').classList.add('active');
+        else document.getElementById('btn_slotB').classList.remove('active');
         document.getElementById('toggle_impact_main').checked = data.impact.main;
         document.getElementById('impact_val').value = data.impact.val;
         document.getElementById('toggle_impact_sub').checked = data.impact.sub;
@@ -428,6 +459,7 @@
         }
     }
 
+    // 初期化実行
     onImagineTypeChange('slotA'); onImagineTypeChange('slotB');
     loadData();
     update();
