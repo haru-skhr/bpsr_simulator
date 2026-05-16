@@ -56,7 +56,6 @@
         input:checked + .slider:before { transform: translateX(20px); }
         .disabled-group { opacity: 0.4; pointer-events: none; }
 
-        /* 保存ボタンエリア */
         .storage-controls { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .storage-btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
         .save-btn { background: var(--accent-green); color: #0f172a; }
@@ -167,19 +166,31 @@
     <div class="section-title">🧪 潜在心相晶：因子</div>
     <div class="stat-group" style="background: rgba(168, 85, 247, 0.08);">
         <div class="stat-grid">
-            <div class="buff-card" style="border-left-color: var(--accent-purple);">
-                <label style="color:var(--text-dim); font-size: 0.7rem;">極性X5 (会心系)</label>
-                <select id="factor_x5" onchange="update()">
-                    <option value="none">なし</option>
+            <div class="imagine-slot">
+                <select id="f_type_A" onchange="update()">
+                    <option value="none">― Slot A ―</option>
+                    <option value="x5">極性X5 (会心+,器用-)</option>
+                    <option value="x6">極性X6 (幸運+,ファスト-)</option>
+                    <option value="x7">極性X7 (器用+,幸運-)</option>
+                    <option value="x8">極性X8 (ファスト+,会心-)</option>
+                </select>
+                <select id="f_grade_A" onchange="update()" style="margin-top:5px; font-size:0.8rem;">
+                    <option value="none">ランクなし</option>
                     <option value="g5">G5 (+6.38% / -3.83%)</option>
                     <option value="g7">G7 (+7.83% / -4.70%)</option>
                     <option value="g10">G10 (+10.0% / -5.0%)</option>
                 </select>
             </div>
-            <div class="buff-card" style="border-left-color: var(--accent-purple);">
-                <label style="color:var(--text-dim); font-size: 0.7rem;">極性X6 (幸運系)</label>
-                <select id="factor_x6" onchange="update()">
-                    <option value="none">なし</option>
+            <div class="imagine-slot">
+                <select id="f_type_B" onchange="update()">
+                    <option value="none">― Slot B ―</option>
+                    <option value="x5">極性X5 (会心+,器用-)</option>
+                    <option value="x6">極性X6 (幸運+,ファスト-)</option>
+                    <option value="x7">極性X7 (器用+,幸運-)</option>
+                    <option value="x8">極性X8 (ファスト+,会心-)</option>
+                </select>
+                <select id="f_grade_B" onchange="update()" style="margin-top:5px; font-size:0.8rem;">
+                    <option value="none">ランクなし</option>
                     <option value="g5">G5 (+6.38% / -3.83%)</option>
                     <option value="g7">G7 (+7.83% / -4.70%)</option>
                     <option value="g10">G10 (+10.0% / -5.0%)</option>
@@ -202,9 +213,18 @@
         mukboss: { label: '会心', target: 'crit', unit: '', values: [2240, 2688, 3136, 3584, 4032, 4480] },
         heaven: { label: '速度', target: 'fast', unit: '%', values: [10.0, 12.0, 14.0, 16.0, 18.0, 20.0] }
     };
-    const FACTOR_DATA = {
-        x5: { none: { crit: 0, dex: 0 }, g5: { crit: 0.0638, dex: -0.0383 }, g7: { crit: 0.0783, dex: -0.0470 }, g10: { crit: 0.10, dex: -0.05 } },
-        x6: { none: { luck: 0, fast: 0 }, g5: { luck: 0.0638, fast: -0.0383 }, g7: { luck: 0.0783, fast: -0.0470 }, g10: { luck: 0.10, fast: -0.05 } }
+
+    const POLARITY_MAP = {
+        x5: { pos: 'crit', neg: 'dex' },
+        x6: { pos: 'luck', neg: 'fast' },
+        x7: { pos: 'dex', neg: 'luck' },
+        x8: { pos: 'fast', neg: 'crit' }
+    };
+    const GRADE_RATES = {
+        none: { pos: 0, neg: 0 },
+        g5: { pos: 0.0638, neg: -0.0383 },
+        g7: { pos: 0.0783, neg: -0.0470 },
+        g10: { pos: 0.10, neg: -0.05 }
     };
 
     function floor2(n) { return Math.floor(n * 100) / 100; }
@@ -237,9 +257,17 @@
         const isImpact = document.getElementById('toggle_impact_main').checked;
         document.getElementById('impact_section').classList.toggle('disabled-group', !isImpact);
 
-        const fx5 = FACTOR_DATA.x5[document.getElementById('factor_x5').value];
-        const fx6 = FACTOR_DATA.x6[document.getElementById('factor_x6').value];
-        const f = { crit: fx5.crit, dex: fx5.dex, luck: fx6.luck, fast: fx6.fast, omni: 0 };
+        let f = { crit: 0, fast: 0, luck: 0, dex: 0, omni: 0 };
+        ['A', 'B'].forEach(slot => {
+            const type = document.getElementById('f_type_' + slot).value;
+            const grade = document.getElementById('f_grade_' + slot).value;
+            if (type !== 'none' && grade !== 'none') {
+                const map = POLARITY_MAP[type];
+                const rate = GRADE_RATES[grade];
+                f[map.pos] += rate.pos;
+                f[map.neg] += rate.neg;
+            }
+        });
 
         const rawInputs = {
             crit: parseFloat(document.getElementById('in_crit').value) || 0,
@@ -321,7 +349,6 @@
         document.getElementById('disp_dmg').innerText = floor2(r.omni * 0.35).toFixed(2) + "%";
     }
 
-    // --- ローカルストレージ機能 ---
     function saveData() {
         const data = {
             class: document.getElementById('class_select').value,
@@ -354,19 +381,20 @@
                 sub: document.getElementById('toggle_impact_sub').checked
             },
             factors: {
-                x5: document.getElementById('factor_x5').value,
-                x6: document.getElementById('factor_x6').value
+                typeA: document.getElementById('f_type_A').value,
+                gradeA: document.getElementById('f_grade_A').value,
+                typeB: document.getElementById('f_type_B').value,
+                gradeB: document.getElementById('f_grade_B').value
             }
         };
         localStorage.setItem('bpsr_config', JSON.stringify(data));
-        alert('現在の構成をブラウザに保存しました。');
+        alert('保存しました。');
     }
 
     function loadData() {
         const saved = localStorage.getItem('bpsr_config');
         if (!saved) return;
         const data = JSON.parse(saved);
-
         document.getElementById('class_select').value = data.class;
         for (let k in data.inputs) document.getElementById('in_' + k).value = data.inputs[k];
         document.getElementById('buff_ear').value = data.equip.ear;
@@ -375,38 +403,33 @@
         document.getElementById('buff_talisman').value = data.equip.talisman;
         document.getElementById('buff_weapon_spd').value = data.equip.weapon_spd;
         document.getElementById('buff_red_weapon').value = data.equip.red_weapon;
-
-        // イマジン復元
         document.getElementById('sel_slotA').value = data.imagine.slotA_type;
         onImagineTypeChange('slotA');
         document.getElementById('grade_slotA').value = data.imagine.slotA_grade;
         if (data.imagine.slotA_active) document.getElementById('btn_slotA').classList.add('active');
-        
         document.getElementById('sel_slotB').value = data.imagine.slotB_type;
         onImagineTypeChange('slotB');
         document.getElementById('grade_slotB').value = data.imagine.slotB_grade;
         if (data.imagine.slotB_active) document.getElementById('btn_slotB').classList.add('active');
-
         document.getElementById('toggle_impact_main').checked = data.impact.main;
         document.getElementById('impact_val').value = data.impact.val;
         document.getElementById('toggle_impact_sub').checked = data.impact.sub;
-
-        document.getElementById('factor_x5').value = data.factors.x5;
-        document.getElementById('factor_x6').value = data.factors.x6;
-
+        document.getElementById('f_type_A').value = data.factors.typeA;
+        document.getElementById('f_grade_A').value = data.factors.gradeA;
+        document.getElementById('f_type_B').value = data.factors.typeB;
+        document.getElementById('f_grade_B').value = data.factors.gradeB;
         update();
     }
 
     function clearData() {
-        if(confirm('保存されたデータを削除し、初期状態に戻しますか？')) {
+        if(confirm('リセットしますか？')) {
             localStorage.removeItem('bpsr_config');
             location.reload();
         }
     }
 
-    // 初期化
     onImagineTypeChange('slotA'); onImagineTypeChange('slotB');
-    loadData(); // 保存データがあれば読み込み
+    loadData();
     update();
 </script>
 </body>
