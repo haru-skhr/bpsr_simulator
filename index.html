@@ -85,30 +85,6 @@
         </div>
     </div>
 
-    <div class="section-title">🧪 潜在心相晶：因子</div>
-    <div class="stat-group" style="background: rgba(168, 85, 247, 0.08);">
-        <div class="stat-grid">
-            <div class="buff-card" style="border-left-color: var(--accent-purple);">
-                <label style="color:var(--text-dim); font-size: 0.7rem;">極性X5 (会心系)</label>
-                <select id="factor_x5" onchange="update()">
-                    <option value="none">なし</option>
-                    <option value="g5">G5 (+6.38% / -3.83%)</option>
-                    <option value="g7">G7 (+7.83% / -4.70%)</option>
-                    <option value="g10">G10 (+10.0% / -5.0%)</option>
-                </select>
-            </div>
-            <div class="buff-card" style="border-left-color: var(--accent-purple);">
-                <label style="color:var(--text-dim); font-size: 0.7rem;">極性X6 (幸運系)</label>
-                <select id="factor_x6" onchange="update()">
-                    <option value="none">なし</option>
-                    <option value="g5">G5 (+6.38% / -3.83%)</option>
-                    <option value="g7">G7 (+7.83% / -4.70%)</option>
-                    <option value="g10">G10 (+10.0% / -5.0%)</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
     <div class="section-title">📊 ステータス入力</div>
     <div class="stat-group" style="background: var(--group-battle-bg);">
         <div class="stat-grid">
@@ -178,6 +154,30 @@
         <div id="impact_section" class="disabled-group">
             <div class="switch-row"><span>幸運固定バフ (+1.0%)</span><span style="color:var(--accent-green); font-size:0.8rem;">自動適用</span></div>
             <div class="switch-row"><span>幸運選択バフ (+1.0～3.0%)</span><div style="display:flex; align-items:center; gap:8px;"><select id="impact_val" style="width:65px; padding:3px;" onchange="update()"><option value="1.0">1.0</option><option value="2.0">2.0</option><option value="3.0">3.0</option></select><label class="switch"><input type="checkbox" id="toggle_impact_sub" onchange="update()"><span class="slider"></span></label></div></div>
+        </div>
+    </div>
+
+    <div class="section-title">🧪 潜在心相晶：因子</div>
+    <div class="stat-group" style="background: rgba(168, 85, 247, 0.08);">
+        <div class="stat-grid">
+            <div class="buff-card" style="border-left-color: var(--accent-purple);">
+                <label style="color:var(--text-dim); font-size: 0.7rem;">極性X5 (会心系)</label>
+                <select id="factor_x5" onchange="update()">
+                    <option value="none">なし</option>
+                    <option value="g5">G5 (+6.38% / -3.83%)</option>
+                    <option value="g7">G7 (+7.83% / -4.70%)</option>
+                    <option value="g10">G10 (+10.0% / -5.0%)</option>
+                </select>
+            </div>
+            <div class="buff-card" style="border-left-color: var(--accent-purple);">
+                <label style="color:var(--text-dim); font-size: 0.7rem;">極性X6 (幸運系)</label>
+                <select id="factor_x6" onchange="update()">
+                    <option value="none">なし</option>
+                    <option value="g5">G5 (+6.38% / -3.83%)</option>
+                    <option value="g7">G7 (+7.83% / -4.70%)</option>
+                    <option value="g10">G10 (+10.0% / -5.0%)</option>
+                </select>
+            </div>
         </div>
     </div>
 </div>
